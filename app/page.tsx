@@ -4,10 +4,10 @@ export default function HomePage() {
       <section className="panel stack">
         <div>
           <p className="muted">Intergalactic Cargo Portal</p>
-          <h1>Project setup complete.</h1>
+          <h1>Task 1 foundation is underway.</h1>
           <p className="muted">
-            This Next.js app is ready. We can now add authentication, database models, uploads, and
-            the dashboard step by step.
+            Authentication routes and the user database model are being built first. Role assignment
+            happens only on the backend.
           </p>
         </div>
       </section>
