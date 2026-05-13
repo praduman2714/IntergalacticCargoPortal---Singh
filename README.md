@@ -10,6 +10,16 @@ Full-stack Next.js portal for authentication, RBAC, and cargo manifest workflows
 - Prisma user model
 - Server-side role provisioning
 
+## Task 2 Core Engine
+
+- `POST /api/upload`
+- `GET /api/cargo`
+- Admin-only manifest uploads
+- Standard users receive `403` with `Clearance level inadequate.`
+- Sector-7 cargo weights are multiplied by `1.45`
+- Final weights are rounded to the nearest whole number
+- Records with prime-number final weights are skipped
+
 ## Local Setup
 
 Install dependencies:
@@ -64,4 +74,18 @@ Admin signup payload:
   "email": "commander@nebula-corp.com",
   "password": "SecurePass123"
 }
+```
+
+## Upload Example
+
+```bash
+curl -X POST http://localhost:3000/api/upload \
+  -H "Authorization: Bearer ADMIN_TOKEN_HERE" \
+  -F "file=@manifest.txt"
+```
+
+Fetch saved cargo:
+
+```bash
+curl http://localhost:3000/api/cargo
 ```
