@@ -19,6 +19,7 @@ Full-stack Next.js portal for authentication, RBAC, and cargo manifest workflows
 - Sector-7 cargo weights are multiplied by `1.45`
 - Final weights are rounded to the nearest whole number
 - Records with prime-number final weights are skipped
+- Public cargo fetches are rate-limited to 60 requests per minute per client IP
 
 ## Local Setup
 
