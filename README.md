@@ -24,12 +24,14 @@ Full-stack Next.js portal for authentication, RBAC, and cargo manifest workflows
 ## Task 3 Frontend Dashboard
 
 - Login and signup screen
+- Landing page with top-bar Sign in and Sign up actions
 - Role-aware dashboard after authentication
 - Admin users see a `File Upload` button and cargo table
 - Standard users see only the cargo table; upload controls are not rendered
 - Admin weights display in `KG`
 - Standard weights display in `LBS`
 - Cargo is sorted heaviest to lightest, with Earth pinned to the bottom
+- Tailwind CSS frontend styling
 
 ## Local Setup
 
