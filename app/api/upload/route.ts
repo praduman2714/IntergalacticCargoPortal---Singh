@@ -16,21 +16,41 @@ function getBearerToken(request: Request) {
   return authorization.slice("Bearer ".length).trim();
 }
 
+function isUploadedFile(value: FormDataEntryValue | null): value is File {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "text" in value &&
+    typeof value.text === "function"
+  );
+}
+
 async function getManifestText(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
 
   if (contentType.includes("multipart/form-data")) {
     const formData = await request.formData();
-    const file = formData.get("file") ?? formData.get("manifest");
+    const uploadedFile =
+      formData.get("file") ??
+      formData.get("manifest") ??
+      [...formData.values()].find((value) => isUploadedFile(value)) ??
+      null;
 
-    if (!(file instanceof File)) {
-      return null;
+    if (!isUploadedFile(uploadedFile)) {
+      return {
+        error: "Upload requires a manifest.txt file.",
+        receivedKeys: [...formData.keys()]
+      };
     }
 
-    return file.text();
+    return {
+      text: await uploadedFile.text()
+    };
   }
 
-  return request.text();
+  return {
+    text: await request.text()
+  };
 }
 
 export async function POST(request: Request) {
@@ -52,13 +72,17 @@ export async function POST(request: Request) {
     return new NextResponse("Clearance level inadequate.", { status: 403 });
   }
 
-  const manifestText = await getManifestText(request);
+  const manifest = await getManifestText(request);
 
-  if (!manifestText) {
-    return NextResponse.json({ error: "Upload requires a manifest.txt file." }, { status: 400 });
+  if ("error" in manifest) {
+    return NextResponse.json(manifest, { status: 400 });
   }
 
-  const parsedManifest = parseManifestText(manifestText);
+  if (!manifest.text.trim()) {
+    return NextResponse.json({ error: "Uploaded manifest is empty." }, { status: 400 });
+  }
+
+  const parsedManifest = parseManifestText(manifest.text);
 
   if (parsedManifest.invalidLines.length > 0) {
     return NextResponse.json(
