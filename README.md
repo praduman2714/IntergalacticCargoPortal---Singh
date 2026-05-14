@@ -21,6 +21,16 @@ Full-stack Next.js portal for authentication, RBAC, and cargo manifest workflows
 - Records with prime-number final weights are skipped
 - Public cargo fetches are rate-limited to 60 requests per minute per client IP
 
+## Task 3 Frontend Dashboard
+
+- Login and signup screen
+- Role-aware dashboard after authentication
+- Admin users see a `File Upload` button and cargo table
+- Standard users see only the cargo table; upload controls are not rendered
+- Admin weights display in `KG`
+- Standard weights display in `LBS`
+- Cargo is sorted heaviest to lightest, with Earth pinned to the bottom
+
 ## Local Setup
 
 Install dependencies:
@@ -43,10 +53,10 @@ Generate Prisma Client:
 npm run prisma:generate
 ```
 
-Run the first migration after your database is ready:
+Run migrations after your database is ready:
 
 ```bash
-npm run prisma:migrate -- --name init
+npm run prisma:migrate
 ```
 
 Start the development server:
@@ -59,6 +69,20 @@ Open:
 
 ```txt
 http://localhost:3000
+```
+
+## Demo Accounts
+
+Create an Admin account with an email ending in `@nebula-corp.com`.
+
+```txt
+commander@nebula-corp.com
+```
+
+Create a Standard account with any other email domain.
+
+```txt
+pilot@gmail.com
 ```
 
 ## Role Provisioning Rule
