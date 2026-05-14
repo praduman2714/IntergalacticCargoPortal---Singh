@@ -59,6 +59,7 @@ export default function HomePage() {
   const [showPassword, setShowPassword] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [session, setSession] = useState<{ user: AuthUser; token: string } | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [cargo, setCargo] = useState<CargoRecord[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
@@ -72,12 +73,18 @@ export default function HomePage() {
     const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
 
     if (storedSession) {
-      setSession(JSON.parse(storedSession));
+      try {
+        setSession(JSON.parse(storedSession));
+      } catch {
+        window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      }
     }
 
     if (storedTheme === "light" || storedTheme === "dark") {
       setTheme(storedTheme);
     }
+
+    setIsHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -92,15 +99,20 @@ export default function HomePage() {
   }, [session]);
 
   async function loadCargo() {
-    const response = await fetch("/api/cargo");
-    const data = (await response.json()) as { cargo?: CargoRecord[]; error?: string };
+    const response = await fetch(`/api/cargo?ts=${Date.now()}`, {
+      cache: "no-store"
+    });
+    const data = (await response.json().catch(() => null)) as {
+      cargo?: CargoRecord[];
+      error?: string;
+    } | null;
 
     if (!response.ok) {
-      setMessage(data.error ?? "Could not load cargo.");
+      setMessage(data?.error ?? "Could not load cargo.");
       return;
     }
 
-    setCargo(data.cargo ?? []);
+    setCargo(data?.cargo ?? []);
   }
 
   function openAuthForm(nextAuthMode: AuthMode) {
@@ -179,12 +191,12 @@ export default function HomePage() {
     }
 
     setSelectedFile(null);
+    await loadCargo();
     setMessage(
       `Upload complete. Saved ${uploadResult.savedCount ?? 0} records. Skipped primes: ${
         uploadResult.skippedPrimeCargoIds?.join(", ") || "none"
       }.`
     );
-    await loadCargo();
   }
 
   function handleLogout() {
@@ -197,6 +209,16 @@ export default function HomePage() {
   }
 
   const themeButtonLabel = theme === "light" ? "Dark" : "Light";
+
+  if (!isHydrated) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
+        <div className="rounded-lg border border-slate-200 bg-white px-6 py-4 text-sm font-bold shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          Loading cargo portal...
+        </div>
+      </main>
+    );
+  }
 
   if (!session) {
     return (

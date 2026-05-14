@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     },
     {
       headers: {
-        "Cache-Control": "public, max-age=30, stale-while-revalidate=60",
+        "Cache-Control": "no-store",
         "X-RateLimit-Limit": CARGO_RATE_LIMIT.limit.toString(),
         "X-RateLimit-Remaining": rateLimit.remaining.toString()
       }
