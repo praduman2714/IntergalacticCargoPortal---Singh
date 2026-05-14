@@ -26,6 +26,7 @@ type AuthResponse = {
 };
 
 const AUTH_STORAGE_KEY = "intergalactic-cargo-auth";
+const THEME_STORAGE_KEY = "intergalactic-cargo-theme";
 
 function sortCargoForDashboard(cargo: CargoRecord[]) {
   return [...cargo].sort((a, b) => {
@@ -51,8 +52,10 @@ function formatWeight(record: CargoRecord, role: Role) {
 
 export default function HomePage() {
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [email, setEmail] = useState("commander@nebula-corp.com");
-  const [password, setPassword] = useState("SecurePass123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [session, setSession] = useState<{ user: AuthUser; token: string } | null>(null);
   const [cargo, setCargo] = useState<CargoRecord[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -64,11 +67,21 @@ export default function HomePage() {
 
   useEffect(() => {
     const storedSession = window.localStorage.getItem(AUTH_STORAGE_KEY);
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
 
     if (storedSession) {
       setSession(JSON.parse(storedSession));
     }
+
+    if (storedTheme === "light" || storedTheme === "dark") {
+      setTheme(storedTheme);
+    }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
 
   useEffect(() => {
     if (!session) return;
@@ -172,14 +185,20 @@ export default function HomePage() {
   if (!session) {
     return (
       <main className="shell auth-shell">
+        <button
+          className="theme-toggle"
+          type="button"
+          onClick={() => setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"))}
+          aria-label="Switch theme"
+        >
+          {theme === "light" ? "Dark" : "Light"}
+        </button>
+
         <section className="auth-panel">
           <div className="brand-block">
             <p className="eyebrow">Intergalactic Cargo Portal</p>
-            <h1>Manifest control for orbital logistics.</h1>
-            <p className="muted">
-              Sign in or create an account. Nebula Corp addresses receive Admin clearance
-              automatically.
-            </p>
+            <h1>Secure cargo operations, one manifest at a time.</h1>
+            <p className="muted">Sign in to manage uploads, review routes, and inspect cargo records.</p>
           </div>
 
           <form className="auth-form" onSubmit={handleAuthSubmit}>
@@ -213,14 +232,24 @@ export default function HomePage() {
 
             <label className="field">
               Password
-              <input
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                type="password"
-                autoComplete={authMode === "login" ? "current-password" : "new-password"}
-                minLength={8}
-                required
-              />
+              <span className="password-control">
+                <input
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={authMode === "login" ? "current-password" : "new-password"}
+                  minLength={8}
+                  required
+                />
+                <button
+                  className="eye-button"
+                  type="button"
+                  onClick={() => setShowPassword((isVisible) => !isVisible)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </span>
             </label>
 
             <button className="primary-button" type="submit" disabled={isSubmitting}>
@@ -236,6 +265,15 @@ export default function HomePage() {
 
   return (
     <main className="shell dashboard-shell">
+      <button
+        className="theme-toggle dashboard-toggle"
+        type="button"
+        onClick={() => setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"))}
+        aria-label="Switch theme"
+      >
+        {theme === "light" ? "Dark" : "Light"}
+      </button>
+
       <header className="dashboard-header">
         <div>
           <p className="eyebrow">Intergalactic Cargo Portal</p>
